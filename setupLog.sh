@@ -3,6 +3,7 @@ logglyToken="[derive the customer token from loggly admin page and put it here]"
 serviceName="CatalogService"
 stackEnv="QA"
 stackName="loggly-$serviceName"
+s3BucketName="logglyLamdaCode"
 
 # delete stack
 # aws cloudformation delete-stack --stack-name "$stackName"
@@ -17,10 +18,11 @@ if [ "$keyMetadata" != "" ]; then
     stackEnvParam="StackEnv=${stackEnv}"
     logGroupNameParam="LogGroupName=${stackEnv}-${serviceName}"
     accessRoleArnParam="AccessRoleArn=${accessRoleArn}"
-
+    lambdaCodeS3BucketNameParam="LambdaCodeS3BucketName=${s3BucketName}"
+	
     aws cloudformation deploy \
         --template-file loggly.yaml \
         --stack-name "$stackName" \
         --capabilities CAPABILITY_IAM \
-        --parameter-overrides "$logGroupNameParam" 'LogglyHostName=logs-01.loggly.com' "$serviceNameParam" "$stackEnvParam" "$logglyTokenParam" "$accessRoleArnParam"
+        --parameter-overrides "$logGroupNameParam" 'LogglyHostName=logs-01.loggly.com' "$serviceNameParam" "$stackEnvParam" "$logglyTokenParam" "$accessRoleArnParam" "$lambdaCodeS3BucketNameParam"
 fi

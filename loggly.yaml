@@ -18,13 +18,16 @@ Parameters:
   AccessRoleArn:
     Type: String
     NoEcho: true
-
+  LambdaCodeS3BucketName:
+    Type: String
+    NoEcho: true
+    
 Resources:
   SendToLogglyLambda:
     Type: AWS::Lambda::Function
     Properties:
       Code:
-        S3Bucket: int-toca-ops
+        S3Bucket: LambdaCodeS3BucketName
         S3Key: CloudwactchToLoggly.zip
       Environment:
         Variables:
