@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  LogGroupName:
+    Type: String
+  LogglyToken:
+    Type: String
+    NoEcho: true
+  LogglyHostName:
+    Type: String
+    NoEcho: true
+  ServiceName:
+    Type: String
+    NoEcho: true
+  StackEnv: 
+    Type: String
+    NoEcho: true
+  AccessRoleArn:
+    Type: String
+    NoEcho: true
+
+Resources:
+  SendToLogglyLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket: int-toca-ops
+        S3Key: CloudwactchToLoggly.zip
+      Environment:
+        Variables:
+          kmsEncryptedCustomerToken: !Ref LogglyToken
+          logglyHostName: !Ref LogglyHostName
+          logglyTags: !Join [ '-', [!Ref StackEnv, "loggly-service", !Ref ServiceName] ] 
+      Handler: CloudwactchToLoggly.handler
+      Role: !Ref AccessRoleArn
+      Runtime: "nodejs8.10"
+      Timeout: 100
+
+  SubscriptionFilter:
+    Type: AWS::Logs::SubscriptionFilter
+    Properties:
+      LogGroupName: !Ref LogGroupName
+      FilterPattern: ""
+      DestinationArn: !GetAtt SendToLogglyLambda.Arn
+
+  SendToLogglyLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties: 
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt SendToLogglyLambda.Arn
+      Principal: logs.amazonaws.com
